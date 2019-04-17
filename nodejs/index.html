@@ -1,0 +1,207 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+    <title>I2Catalyst</title>
+
+    <script
+        src="https://code.jquery.com/jquery-3.4.0.min.js"
+        integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg="
+        crossorigin="anonymous">
+    </script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+
+    <script src="./node_modules/wscb/lib/wscb.js"></script>
+
+   
+
+    <style type="text/css">
+
+        body {
+            background-color: rgb(15, 15, 15);
+        }
+
+        .ui.table td {
+            padding: .2em .7em !important;
+        }
+
+        .firstOccurance_bg {
+            background-color: rgba(255, 255, 255, 0.07) !important;
+        }
+
+
+        .sequence {
+            /*background-color: rgb(255, 243, 177) !important;*/
+        }
+
+        .sequence-width {
+            /*background-color: rgb(255, 243, 177) !important;*/
+            width: 3rem !important;
+        }
+
+        .fakeHidden {
+            display: none !important;
+        }
+
+        td {
+            border-left: 0px !important;
+        }
+
+        .orange_bg {
+            background-color: rgb(219, 255, 61) !important;
+        }
+
+        .grey_bg {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .write_bg {
+            background-color: rgba(255, 17, 0, 0.5) !important;
+        }
+        
+        .read_bg {
+            background-color: rgba(0, 195, 255, 0.5) !important;
+        }
+
+        .write_sequence_bg {
+            background-color: rgba(255, 17, 0, 0.1) !important;
+        }
+        
+        .read_sequence_bg {
+            background-color: rgba(0, 195, 255, 0.1) !important;
+        }
+
+        .hex, .dec {
+            width: 2.8rem !important;
+        }
+
+
+        .toggle.label {
+            cursor: pointer;
+            display: inline-block;
+            margin-right: 1em;
+            font-size: 1rem;
+        }
+
+        .ui.toggle.checkbox .box:hover::before,
+        .ui.toggle.checkbox label:hover::before {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .menuSpacer {
+            width: 2.5rem;
+        }
+
+        .bits {
+            /*position: absolute !important;*/
+            width: 2.8rem !important;
+            height: 4px;
+            display: table;
+            padding: 0px !important;
+            border-spacing: 1px;
+
+            top: 0rem;
+            z-index: 99;
+        }
+
+        .bit {
+            width: 2px !important;
+            height: 1px !important;
+            display: table-cell;
+            padding: 0px !important;
+        }
+
+        .bit.zero {
+            background-color: rgb(0, 0, 0) !important;
+        }
+
+        .bit.one {
+            background-color: rgb(255, 255, 255) !important;
+        }
+
+    </style>
+</head>
+
+    <body>
+        <div class="ui tiny fixed menu">
+            <div class="header item">I²Catalyst</div>
+            <a class="ui dropdown icon item comPort_MenuItem">
+                Port
+                <i class="dropdown icon"></i>
+                <div id="comPortList" class="menu"></div>
+            </a>
+            <a class="ui dropdown icon item snapshots_MenuItem">
+                Snapshots
+                <i class="dropdown icon"></i>
+                <div id="i2c_snapshots_list" class="menu"></div>
+            </a>
+
+            <a class="ui dropdown icon item filters_MenuItem">
+                <i class="filter icon"></i>
+                <div class="menu">
+                    <div id="filterFirstOccurances" class="item">Keep first occurances</div>
+                    <div id="toggleBinaryOnly" class="item">Toggle binary only</div>
+                </div>
+            </a>
+
+            <div class="item" style="">
+                <div id="sequenceAction" class="ui labeled button" tabindex="0">
+                    <div id="sequenceActionBtn" class="ui blue icon tiny button">
+                        <i id="sequenceActionIcon" class="play icon"></i>
+                    </div>
+                    <a id="sequenceActionLabel" class="ui basic blue left pointing label">-</a>
+                </div>
+
+
+                <div class="menuSpacer"></div>
+                <div>
+                    <div class="toggle label">HEX</div>
+                    <div id="toggleHexDec" class="ui toggle checkbox">
+                        <input type="checkbox" name="public">
+                        <label>DEC</label>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="" style="text-align: center; margin-top: 3rem;">
+            <div class="ui centered grid">
+                <div class="five wide column">
+                </div>
+                <div class="one wide column">
+                    <div>
+                        <!--
+                        <div class="ui icon buttons">
+                            <button id="prevBtn" class="ui button"><i class="caret square left icon"></i></button>
+                            <button id="nextBtn" class="ui button"><i class="caret square right icon"></i></button>
+                        </div>
+                        -->
+
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <!--
+            <div style="height: 14rem; width: 100%; background-color: brown;">
+
+            </div>
+            -->
+
+            <!--<div style="overflow-y: scroll; bottom: 20rem !important;"">-->
+                <table  class="ui selectable celled very basic collapsing table" style="display: inline-block;">
+                    <tbody id="packet-table"></tbody>
+                </table>
+            <!--</div>-->
+
+            
+        </div>
+
+        <script src="script.js"></script>
+    </body>
+</html>
