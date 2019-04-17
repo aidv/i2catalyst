@@ -13,6 +13,8 @@ void setup() {
   digitalWrite( SCL, LOW); //needed to ignore level shifter
 
   Serial.begin(2000000);
+
+  Wire.begin(); //needed to ignore level shifter
 }
 
 
@@ -46,14 +48,19 @@ void serialRead() {
       bytesStr[i - 2] = getValue(serialInput, ',', i);
 
 
+    Serial.print("write,ok," + getValue(serialInput, ',', 1) + ",");
+
     Wire.beginTransmission(toAddr);
     for (int i = 0; i < BYTE_LENGTH; i++){
-      if (bytesStr[i] != "")
+      if (bytesStr[i] != ""){
         Wire.write(hexStrToByte(bytesStr[i]));
+        Serial.print(bytesStr[i]);
+        Serial.print(",");
+      }
     }
     Wire.endTransmission();
     
-    Serial.println("write,ok,");
+    Serial.println("");
   } else if (cmd == "read"){
     uint8_t toAddr = hexStrToByte(getValue(serialInput, ',', 1));
 

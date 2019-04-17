@@ -550,11 +550,16 @@ wscb.on('packets', function(msg, respondWith){
         
         $('#packet-table').append(
             '<tr id="packetItem_' + i + '" class="packetItem ' + (packets[i].sameAsPrevious ? '' : 'firstOccurance_bg') + '" packet-idx="' + i + '">' +
+                
                 sequenceOrder_Write +
+                '<td id="' + id_start + '-write-address"><a class="ui red label circular tiny">' + packets[i].address + '</a></td>' +
                 '<td id="' + id_start + '-write-bytes" class="packetItem-write-bytes" packet-idx="' + i + '">' + writeBytes + '</td>' +
+                
                 '<td></td>' + // + (readBytes != '' ? '<a class="ui label"> <i class="clock outline icon"></i>' + '30ms' + '</a>': '')  + '</td>' +
+                
                 '<td id="' + id_start + '-read-bytes">' + readBytes  + '</td>' +
                 '<td>' + (msg.packets[i].delay != undefined ? '<a class="ui tiny label"> <i class="clock outline icon"></i>30ms</a>': '')  + '</td>' +
+                '<td id="' + id_start + '-read-address"><a class="ui teal label circular tiny">' + packets[i].address + '</a></td>' +
                 sequenceOrder_Read+
             '</tr>'
         )
