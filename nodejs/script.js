@@ -547,20 +547,32 @@ wscb.on('packets', function(msg, respondWith){
         ;
 
 
+        var writeAddr = '';
+        if (packets[i].address != undefined)
+            writeAddr = '<a class="ui red label circular tiny">' + packets[i].address + '</a>';
+        var writeAddress = '<td id="' + id_start + '-read-address">' + writeAddr + '</td>';
+          
+        var readAddr = '';
+        if (packets[i].response != undefined)
+            readAddr = '<a class="ui teal label circular tiny">' + packets[i].response.address + '</a>';
+        var readAddress = '<td id="' + id_start + '-read-address">' + readAddr + '</td>';
+                
+
         
         $('#packet-table').append(
             '<tr id="packetItem_' + i + '" class="packetItem ' + (packets[i].sameAsPrevious ? '' : 'firstOccurance_bg') + '" packet-idx="' + i + '">' +
                 
                 sequenceOrder_Write +
-                '<td id="' + id_start + '-write-address"><a class="ui red label circular tiny">' + packets[i].address + '</a></td>' +
+                writeAddress +
                 '<td id="' + id_start + '-write-bytes" class="packetItem-write-bytes" packet-idx="' + i + '">' + writeBytes + '</td>' +
                 
                 '<td></td>' + // + (readBytes != '' ? '<a class="ui label"> <i class="clock outline icon"></i>' + '30ms' + '</a>': '')  + '</td>' +
                 
                 '<td id="' + id_start + '-read-bytes">' + readBytes  + '</td>' +
                 '<td>' + (msg.packets[i].delay != undefined ? '<a class="ui tiny label"> <i class="clock outline icon"></i>30ms</a>': '')  + '</td>' +
-                '<td id="' + id_start + '-read-address"><a class="ui teal label circular tiny">' + packets[i].address + '</a></td>' +
+                readAddress +
                 sequenceOrder_Read+
+                
             '</tr>'
         )
 
