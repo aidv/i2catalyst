@@ -191,7 +191,6 @@ $('#toggleBinaryOnly').click(toggleBinaryOnly)
 
 var keepFirstOccurances = false;
 function toggleFirstOccurances(){
-    console.log('TOGGLING FIRST OCCURANCES')
     keepFirstOccurances = !keepFirstOccurances;
     for (var i = 0; i < packets.length; i++)
         if (packets[i].sameAsPrevious)
@@ -609,8 +608,8 @@ wscb.on('packets', function(msg, respondWith){
             var binaryId = id_start + '-write-byte-binary-' + wb;
             writeBytes +=
                 '<div style="float:left; position: relative;">' +
-                    '<a id="' + id_start + '-write-byte-' + wb + '-hex" class="ui red label tiny hex packetByte" packet-idx="' + i + '" byte-idx="' + wb + '" operation="write">' + msg.packets[i].bytes[wb]  + '</a>' + 
-                    '<a id="' + id_start + '-write-byte-' + wb + '-dec" class="ui red label tiny dec packetByte" packet-idx="' + i + '" byte-idx="' + wb + '" operation="write">' + hex2dec(msg.packets[i].bytes[wb]) + '</a>' +
+                    '<a id="' + id_start + '-write-byte-' + wb + '-hex" class="ui red label tiny hex packetByte writeByte" packet-idx="' + i + '" byte-idx="' + wb + '" operation="write">' + msg.packets[i].bytes[wb]  + '</a>' + 
+                    '<a id="' + id_start + '-write-byte-' + wb + '-dec" class="ui red label tiny dec packetByte writeByte" packet-idx="' + i + '" byte-idx="' + wb + '" operation="write">' + hex2dec(msg.packets[i].bytes[wb]) + '</a>' +
                     bT +    
                 '</div>';
         }
@@ -619,8 +618,8 @@ wscb.on('packets', function(msg, respondWith){
 
         if (msg.packets[i].response != undefined){
             for (var rb = 0; rb < msg.packets[i].response.bytes.length; rb++){
-                readBytes += '<a class="ui teal label tiny hex">' + msg.packets[i].response.bytes[rb]  + '</a>' +
-                '<a class="ui teal label tiny dec">' + hex2dec(msg.packets[i].response.bytes[rb]) + '</a>' ;
+                readBytes += '<a class="ui teal label tiny hex packetByte">' + msg.packets[i].response.bytes[rb]  + '</a>' +
+                '<a class="ui teal label tiny dec packetByte">' + hex2dec(msg.packets[i].response.bytes[rb]) + '</a>' ;
             }
         }
 
@@ -667,16 +666,15 @@ wscb.on('packets', function(msg, respondWith){
                 '<td class="packetTagTD"><i class="tag inverted icon packetTag packetTagIcon"></i><a class="ui black right pointing label packetTag packetWriteTag" packet-idx="' + i + '"><div class="ui transparent inverted input"><input type="text" placeholder="Tag..."></div><span class="labelText"></span></td>' +
                 sequenceOrder_Write +
                 writeAddress +
-                '<td id="' + id_start + '-write-bytes" class="packetItem-write-bytes" packet-idx="' + i + '">' + writeBytes + '</td>' +
+                '<td id="' + id_start + '-write-bytes" packet-idx="' + i + '">' + writeBytes + '</td>' +
                 
-                '<td></td>' + // + (readBytes != '' ? '<a class="ui label"> <i class="clock outline icon"></i>' + '30ms' + '</a>': '')  + '</td>' +
+                //'<td></td>' + // + (readBytes != '' ? '<a class="ui label"> <i class="clock outline icon"></i>' + '30ms' + '</a>': '')  + '</td>' +
                 
                 '<td id="' + id_start + '-read-bytes">' + readBytes  + '</td>' +
                 '<td>' + (msg.packets[i].delay != undefined ? '<a class="ui tiny label"> <i class="clock outline icon"></i>30ms</a>': '')  + '</td>' +
                 readAddress +                
                 sequenceOrder_Read +
-                '<td class="packetTagTD"><i class="tag inverted icon packetTag packetTagIcon"></i><a class="ui black left pointing label packetTag packetReadTag" packet-idx="' + i + '"><div class="ui transparent inverted input"><input type="text" placeholder="Tag..."></div><span class="labelText"></span></td>' +
-                
+                '<td class="packetTagTD"><i class="tag inverted icon packetTag packetTagIcon"></i><a class="ui black left pointing label packetTag packetReadTag" packet-idx="' + i + '"><div class="ui transparent inverted input"><input type="text" placeholder="Tag..."></div><span class="labelText"></span></td>' +          
             '</tr>'
         )
 
@@ -694,7 +692,9 @@ wscb.on('packets', function(msg, respondWith){
         .mouseleave(function() { 
             $(this).find( ".icon" ).hide();
         })
-        .click(function(){
+        .click(function(e){
+            e.stopPropagation();
+
             if (captureTagInput != undefined) return;
 
             $(this).find( ".icon" ).hide()
@@ -723,7 +723,7 @@ wscb.on('packets', function(msg, respondWith){
     $('.packetItem').click(onPacketItemClicked)
     $('.packetItem-sequence-order-write').click(onPacketItemSequenceWriteOrderClicked)
     $('.packetItem-sequence-order-read').click(onPacketItemSequenceReadOrderClicked)
-    $('.packetItem-write-bytes').click(onPacketItemWriteBytesClicked)
+    $('.hex.packetByte.writeByte, .dec.packetByte.writeByte').click(onPacketItemWriteBytesClicked)
 
     $('.dec').hide()
 
