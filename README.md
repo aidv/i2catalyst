@@ -16,11 +16,64 @@ Each byte has it's binary representation under it.
 * ESC: Stop running sequence
 * D: Toggle between HEX and Decimal values on bytes
 * B: Show binary representations only (toggle)
+* Shift + Scroll:
+    On top of a byte: Will increase or decrease the value of the byte.
+* T: Toggle tags
 
 ### Serial output
-
 All serial communication will be printed in the web browser developer console.
 
 
+## Usage & Functionality
+
+### First Occurances
+Packets that are different from it's previous neighbour will be highlighted with a white tint.
+All packets under the highlighted packet that are NOT highlighted have the same byte values.
+
+### Changing Addresses and Bytes
+There are two ways to manipulate bytes, and one way to manipulate adddresses.
+
+The primary way is to hover the mouse cursor over an address (read/write) or a write byte, holding SHIFT on your keyboard, and then scroll your mouse wheel.
+
+The secondary way to manipulate bytes is to simply click on a write byte field (the area where the write bytes are located) and then enter the HEX values of the bytes.
+You can enter up to 10 bytes, as that's what the current Arduino code can handle.
+
+### Sending a packet
+Clicking on a packet area to send it to the I2C data line.
+
+### Sequencing
+You can create a packet sequence that allows you to replay a specified set of packets.
+This makes it much easier to understand what's going on and when something happens.
+
+To create a squence you two options:
+- Press A to select all packets. This is filter sensitive, so if you press F first to hide all double occurances and then press A, you'll select only the first occurances. Press X to deselect all packets.
+
+- Click on the packet sequence handle which is located to the left hand side of a write address label, and to the right hand side of a read address label.
+
+
+NOTE: Selecting a packet that has a read response will automatically select the read packet too.
+
+### Notes, Comments and Tags
+Sometimes it's useful to be able to comment/note/tag specific packets.
+
+In I2Catalyst it's called "tagging".
+
+To add a tag, hover the mouse to the very left/right of a packet until you see a tag icon, click the tag icon to start tagging.
+
+ESC will abort tagging and ENTER will confirm the tag.
+
+Erase all text in the tag and press ENTER to remove the tag.
+
+Pressing T on your keyboard will toggle tags on or off.
+
+
+# Brainstorming
+
+- Add grouping, scripting, conditional filtering, etc etc...
+
+# License & Contribution
+
+This code is free to use for personal usage, may freely be redistributed but may NOT be sold or capitalized off of.
+For commercial usage, please contact me by creating a new issue ticket.
 
 ![](https://github.com//aidv/i2catalyst/blob/master/preview.png?raw=true)

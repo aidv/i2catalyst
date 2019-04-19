@@ -235,6 +235,8 @@ function addAndTrySend(packet){
 }
 
 function sendNextInQueue(){
+    if (!com_device.port) return;
+
     if (serialWriteQueue_ClearOnNext_Callback != undefined){
         serialWriteQueue = [];
         serialWriteQueue_ClearOnNext_Callback({status: 'ok'});

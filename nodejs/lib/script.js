@@ -1,4 +1,11 @@
 
+var scrollByteTrigger = {
+    current: 0,
+    threshold: 3500,
+}
+
+
+
 $('.ui.checkbox').checkbox();
 
 $('.toggle.label').click(function(){
@@ -178,6 +185,60 @@ function toggleFirstOccurances(){
         
 }
 $('#filterFirstOccurances').click(toggleFirstOccurances)
+
+
+function scrollByte(e){
+    var delta = e.originalEvent.wheelDelta;
+
+    if (e.shiftKey){
+        e.preventDefault()
+
+        scrollByteTrigger.current += delta;
+        if ((scrollByteTrigger.current < 0 && scrollByteTrigger.current > 0 - scrollByteTrigger.threshold) || (scrollByteTrigger.current > 0 && scrollByteTrigger.current < scrollByteTrigger.threshold)){
+            return;
+        }
+        scrollByteTrigger.current = 0;
+
+        var packetIdx = $(this).attr('packet-idx')
+        var packet = packets[packetIdx]
+    
+
+
+        if ($(this).hasClass('packetByte')){
+            console.log('SCROLLING BYTE')
+            var byteIdx = $(this).attr('byte-idx')
+            var hex = packet.bytes[byteIdx]
+
+            var dec = hex2dec(hex) + (delta < 0 ? 1 : -1);
+
+            if (dec < 0) dec = 255;
+            if (dec > 255) dec = 0;
+
+            hex = dec2hex(dec);
+            packet.bytes[byteIdx] = hex;
+
+            $('#packetItem-' + packetIdx + '-write-byte-' + byteIdx + '-hex').html((hex.length == 1 ? '0' : '') + hex)
+            $('#packetItem-' + packetIdx + '-write-byte-' + byteIdx + '-dec').html(dec)
+
+            setBinaryValues('#packet-' + packetIdx + '-binary-' + byteIdx, bitArray(hex))
+        } else if ($(this).hasClass('packetWriteAddress') || $(this).hasClass('packetReadAddress')) {
+            var addr = parseInt(packet.address) + (delta < 0 ? 1 : -1)
+            packet.address = addr.toString();
+            $(this).html(addr)
+        }
+    }
+}
+
+function setBinaryValues(binaryTableID, bits){
+    var bits_ = $($(binaryTableID).children()[0]).children()
+    for (var i = 0; i < bits_.length; i++){
+        $(bits_[i]).removeClass('one')
+        $(bits_[i]).removeClass('zero')
+        $(bits_[i]).addClass((bits[i] == "0" ? 'zero' : 'one'))
+    }
+
+}
+
 
 
 
@@ -448,7 +509,7 @@ function onPacketItemWriteBytesClicked(){
                 return;
             }
 
-            var bT = generateBitTable(bytes[i]);
+            var bT = generateBitTable(bytes[i], 'packet-' + packetIdx + '-binary-' + i);
             writeBytes +=
                 '<div style="float:left; position: relative;">' +
                     '<a class="ui red label tiny hex">' + bytes[i]  + '</a>' + 
@@ -514,12 +575,12 @@ wscb.on('packets', function(msg, respondWith){
         previousBytes = msg.packets[i].bytes;
 
         for (var wb = 0; wb < msg.packets[i].bytes.length; wb++){
-            var bT = generateBitTable(msg.packets[i].bytes[wb]);
+            var bT = generateBitTable(msg.packets[i].bytes[wb], 'packet-' + i + '-binary-' + wb);
             var binaryId = id_start + '-write-byte-binary-' + wb;
             writeBytes +=
                 '<div style="float:left; position: relative;">' +
-                    '<a class="ui red label tiny hex">' + msg.packets[i].bytes[wb]  + '</a>' + 
-                    '<a class="ui red label tiny dec">' + hex2dec(msg.packets[i].bytes[wb]) + '</a>' +
+                    '<a id="' + id_start + '-write-byte-' + wb + '-hex" class="ui red label tiny hex packetByte" packet-idx="' + i + '" byte-idx="' + wb + '" operation="write">' + msg.packets[i].bytes[wb]  + '</a>' + 
+                    '<a id="' + id_start + '-write-byte-' + wb + '-dec" class="ui red label tiny dec packetByte" packet-idx="' + i + '" byte-idx="' + wb + '" operation="write">' + hex2dec(msg.packets[i].bytes[wb]) + '</a>' +
                     bT +    
                 '</div>';
         }
@@ -549,13 +610,13 @@ wscb.on('packets', function(msg, respondWith){
 
         var writeAddr = '';
         if (packets[i].address != undefined)
-            writeAddr = '<a class="ui red label circular tiny">' + packets[i].address + '</a>';
-        var writeAddress = '<td id="' + id_start + '-read-address">' + writeAddr + '</td>';
+            writeAddr = '<a class="ui red label circular tiny packetWriteAddress" packet-idx="' + i + '">' + packets[i].address + '</a>';
+        var writeAddress = '<td id="' + id_start + '-write-address">' + writeAddr + '</td>';
           
         var readAddr = '';
         if (packets[i].response != undefined)
-            readAddr = '<a class="ui teal label circular tiny">' + packets[i].response.address + '</a>';
-        var readAddress = '<td id="' + id_start + '-read-address">' + readAddr + '</td>';
+            readAddr = '<a class="ui teal label circular tiny packetReadAddress" packet-idx="' + i + '">' + packets[i].response.address + '</a>';
+        var readAddress = '<td id="' + id_start + '-read-address" >' + readAddr + '</td>';
                 
 
         
@@ -580,6 +641,8 @@ wscb.on('packets', function(msg, respondWith){
         $('#packetSequenceOrder-' + i + '-read').hide()
 
         packets[i].jq_el = $('#packetItem_' + i );
+
+        $('.packetByte, .packetWriteAddress, .packetReadAddress').bind('mousewheel', scrollByte);
     }
 
     $('.packetItem').click(onPacketItemClicked)
@@ -656,25 +719,27 @@ function hex2dec(hex){
     return num;
 }
 
+function dec2hex(dec) { return (+dec).toString(16).toUpperCase(); }
+
 function bitArray(hex){
     var bits = [];
     var base2 = hex2dec(hex).toString(2);
 
     for (var i = 0; i < 8 - base2.length; i++)
-        bits.push(0)
+        bits.push("0")
 
     for (var i = 0; i < 8; i++)
-        bits.push(base2[i])
+        bits.push((base2[i] == undefined ? "0" : base2[i] ))
 
     return bits;
 }
 
-function generateBitTable(hex){
+function generateBitTable(hex, id){
     var bA = bitArray(hex);
-    var bT = ' <table class="bits">';
+    var bT = ' <table id="' + id + '" class="bits">';
 
     for (var i = 0; i < 8; i++)
-        bT += '<tr class="bit ' + (bA[i] == "0" || bA[i] == undefined ? 'zero' : 'one' ) + '"></tr>';
+        bT += '<tr class="bit ' + (bA[i] == "0" ? 'zero' : 'one' ) + '"></tr>';
 
     bT += '</table>';
     return bT;
