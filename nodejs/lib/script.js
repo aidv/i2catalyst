@@ -4,6 +4,7 @@ var scrollByteTrigger = {
     threshold: 3500,
 }
 
+var captureTagInput = undefined;
 
 
 $('.ui.checkbox').checkbox();
@@ -100,6 +101,22 @@ function refresh_i2c_snapshots(){
 /******/
 
 $(document).keydown(function(e) {
+
+    if (captureTagInput != undefined){
+        if (e.which == 27 || e.which == 13){
+            var newText = captureTagInput.input.find('input').val();
+
+            captureTagInput.text.html((e.which == 27 ? captureTagInput.lastText : newText))
+            captureTagInput.text.show()
+
+            captureTagInput.input.hide()
+
+            if (captureTagInput.text.html() == '') captureTagInput.label.hide()
+            captureTagInput = undefined;
+        }
+        return;
+    }
+
     switch(e.which) {
         case 68:
             toggleHexDec();
@@ -112,8 +129,8 @@ $(document).keydown(function(e) {
         case 27: stopSequence(); break;
 
         case 70: toggleFirstOccurances(); break;
-
         case 66: toggleBinaryOnly(); break;
+        case 84: toggleTags(); break;
 
         default: console.log(e.which)
     }
@@ -205,7 +222,6 @@ function scrollByte(e){
 
 
         if ($(this).hasClass('packetByte')){
-            console.log('SCROLLING BYTE')
             var byteIdx = $(this).attr('byte-idx')
             var hex = packet.bytes[byteIdx]
 
@@ -223,6 +239,10 @@ function scrollByte(e){
             setBinaryValues('#packet-' + packetIdx + '-binary-' + byteIdx, bitArray(hex))
         } else if ($(this).hasClass('packetWriteAddress') || $(this).hasClass('packetReadAddress')) {
             var addr = parseInt(packet.address) + (delta < 0 ? 1 : -1)
+            
+            if (addr < 0) addr = 128;
+            if (addr > 128) addr = 0;
+
             packet.address = addr.toString();
             $(this).html(addr)
         }
@@ -238,6 +258,16 @@ function setBinaryValues(binaryTableID, bits){
     }
 
 }
+
+var hideTags = false;
+function toggleTags(){
+    hideTags = !hideTags;
+    if (hideTags) $('.packetTagTD').hide(); else $('.packetTagTD').show();
+}
+$('#toggleTags').click(toggleTags)
+
+
+
 
 
 
@@ -323,9 +353,9 @@ function runSequence(){
 
     setTimeout(function(){
         for (var i = 0; i < Object.keys(packetSequence).length; i++){
-        var key = Object.keys(packetSequence)[i];
-        $(packetSequence[key].jq_el).removeClass('grey_bg');
-    }
+            var key = Object.keys(packetSequence)[i];
+            $(packetSequence[key].jq_el).removeClass('grey_bg');
+        }
     }, 5000)
 }
 
@@ -512,8 +542,8 @@ function onPacketItemWriteBytesClicked(){
             var bT = generateBitTable(bytes[i], 'packet-' + packetIdx + '-binary-' + i);
             writeBytes +=
                 '<div style="float:left; position: relative;">' +
-                    '<a class="ui red label tiny hex">' + bytes[i]  + '</a>' + 
-                    '<a class="ui red label tiny dec">' + hex2dec(bytes[i]) + '</a>' +
+                    '<a class="ui red label tiny packetByte hex">' + bytes[i]  + '</a>' + 
+                    '<a class="ui red label tiny packetByte dec">' + hex2dec(bytes[i]) + '</a>' +
                     bT +    
                 '</div>';
 
@@ -597,7 +627,7 @@ wscb.on('packets', function(msg, respondWith){
 
         var sequenceOrder_Write =
             '<td id="' + id_start + '-sequence-order-write" class="packetItem-sequence-order-write write_sequence_bg sequence-width" style="text-align: center;" packet-idx="' + i + '">' +
-                    '<i id="packetSequenceOrder-' + i + '-write" class="play red icon"></i>' +
+            '<i id="packetSequenceOrder-' + i + '-write" class="play red icon"></i>' +
             '</td>'
         ;
 
@@ -609,20 +639,32 @@ wscb.on('packets', function(msg, respondWith){
 
 
         var writeAddr = '';
-        if (packets[i].address != undefined)
-            writeAddr = '<a class="ui red label circular tiny packetWriteAddress" packet-idx="' + i + '">' + packets[i].address + '</a>';
-        var writeAddress = '<td id="' + id_start + '-write-address">' + writeAddr + '</td>';
+        if (packets[i].address != undefined){
+            var bT = generateBitTable(packets[i].address, 'packet-' + i + '-write-address-binary');
+            writeAddr =
+                '<a class="ui red label circular tiny hex packetWriteAddress" packet-idx="' + i + '">' + packets[i].address + '</a>' +
+                '<a class="ui red label circular tiny dec packetWriteAddress" packet-idx="' + i + '">' + hex2dec(packets[i].address) + '</a>' +
+                bT
+            ;
+        }
+        var writeAddress = '<td id="' + id_start + '-write-address" class="packetAddress">' + writeAddr + '</td>';
           
         var readAddr = '';
-        if (packets[i].response != undefined)
-            readAddr = '<a class="ui teal label circular tiny packetReadAddress" packet-idx="' + i + '">' + packets[i].response.address + '</a>';
-        var readAddress = '<td id="' + id_start + '-read-address" >' + readAddr + '</td>';
+        if (packets[i].response != undefined){
+            var bT = generateBitTable(packets[i].address, 'packet-' + i + '-read-address-binary');
+            readAddr =
+                '<a class="ui teal label circular tiny hex packetReadAddress" packet-idx="' + i + '">' + packets[i].response.address + '</a>' +
+                '<a class="ui teal label circular tiny dec packetReadAddress" packet-idx="' + i + '">' + hex2dec(packets[i].response.address) + '</a>' +
+                bT
+            ;
+        }
+        var readAddress = '<td id="' + id_start + '-read-address" class="packetAddress">' + readAddr + '</td>';
                 
 
         
         $('#packet-table').append(
             '<tr id="packetItem_' + i + '" class="packetItem ' + (packets[i].sameAsPrevious ? '' : 'firstOccurance_bg') + '" packet-idx="' + i + '">' +
-                
+                '<td class="packetTagTD"><i class="tag inverted icon packetTag packetTagIcon"></i><a class="ui black right pointing label packetTag packetWriteTag" packet-idx="' + i + '"><div class="ui transparent inverted input"><input type="text" placeholder="Tag..."></div><span class="labelText"></span></td>' +
                 sequenceOrder_Write +
                 writeAddress +
                 '<td id="' + id_start + '-write-bytes" class="packetItem-write-bytes" packet-idx="' + i + '">' + writeBytes + '</td>' +
@@ -631,14 +673,47 @@ wscb.on('packets', function(msg, respondWith){
                 
                 '<td id="' + id_start + '-read-bytes">' + readBytes  + '</td>' +
                 '<td>' + (msg.packets[i].delay != undefined ? '<a class="ui tiny label"> <i class="clock outline icon"></i>30ms</a>': '')  + '</td>' +
-                readAddress +
-                sequenceOrder_Read+
+                readAddress +                
+                sequenceOrder_Read +
+                '<td class="packetTagTD"><i class="tag inverted icon packetTag packetTagIcon"></i><a class="ui black left pointing label packetTag packetReadTag" packet-idx="' + i + '"><div class="ui transparent inverted input"><input type="text" placeholder="Tag..."></div><span class="labelText"></span></td>' +
                 
             '</tr>'
         )
 
         $('#packetSequenceOrder-' + i + '-write').hide()
         $('#packetSequenceOrder-' + i + '-read').hide()
+        $('.packetTag').hide()
+
+        $('.packetTagTD').find('.input').hide()
+        $('.packetTagTD')
+        .mouseenter(function() {
+            if (captureTagInput == undefined && $(this).find( ".labelText" ).html() == ''){
+                $(this).find( ".icon" ).show();
+            }
+        })
+        .mouseleave(function() { 
+            $(this).find( ".icon" ).hide();
+        })
+        .click(function(){
+            if (captureTagInput != undefined) return;
+
+            $(this).find( ".icon" ).hide()
+            captureTagInput = {
+                lastText : $(this).find(".labelText").html(),
+                label    : $(this).find(".label"),
+                text     : $(this).find(".labelText"),
+                input    : $(this).find(".input")
+            }
+            
+            captureTagInput.text.hide()
+
+            captureTagInput.input.find('input').val(captureTagInput.lastText)
+            captureTagInput.input.find('input').focus()
+            captureTagInput.input.show()
+
+            captureTagInput.label.show()
+        });
+        
 
         packets[i].jq_el = $('#packetItem_' + i );
 
