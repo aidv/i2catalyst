@@ -523,6 +523,7 @@ function onPacketItemWriteBytesClicked(){
     event.stopPropagation();
 
     var packetIdx = $(this).attr('packet-idx');
+    var id_start = 'packetItem-' + packetIdx;
 
     var bytes = prompt("Please enter hex values. Separate with comma (,):", packets[packetIdx].bytes);
 
@@ -533,25 +534,28 @@ function onPacketItemWriteBytesClicked(){
 
         var writeBytes = '';
         for (var i = 0; i < bytes.length; i++){
-            if (bytes[i].length < 2 || bytes[i].length > 2){
-                alert('One or more hex values are too short or too long. Hex value example: FF,B0,C3')
+            if (bytes[i].length < 2 || bytes[i].length > 2 || !isHex(bytes[i])){
+                alert('One or more hex values are too short or too long, or not a valid HEX value. HEX value example: FF,B0,C3')
                 return;
             }
 
             var bT = generateBitTable(bytes[i], 'packet-' + packetIdx + '-binary-' + i);
             writeBytes +=
                 '<div style="float:left; position: relative;">' +
-                    '<a class="ui red label tiny packetByte hex">' + bytes[i]  + '</a>' + 
-                    '<a class="ui red label tiny packetByte dec">' + hex2dec(bytes[i]) + '</a>' +
+                    '<a id="' + id_start + '-write-byte-' + i + '-hex" class="ui red label tiny hex packetByte writeByte" packet-idx="' + packetIdx + '" byte-idx="' + i + '" operation="write">' + bytes[i].toUpperCase()  + '</a>' + 
+                    '<a id="' + id_start + '-write-byte-' + i + '-dec" class="ui red label tiny dec packetByte writeByte" packet-idx="' + packetIdx + '" byte-idx="' + i + '" operation="write">' + hex2dec(bytes[i]) + '</a>' +
                     bT +    
                 '</div>';
-
          }
 
 
         packets[packetIdx].bytes = bytes;
+
+        
         $('#packetItem-' + packetIdx + '-write-bytes').empty()
         $('#packetItem-' + packetIdx + '-write-bytes').append(writeBytes)
+        $('.hex.packetByte.writeByte, .dec.packetByte.writeByte').click(onPacketItemWriteBytesClicked)
+
         
     }
 
@@ -786,6 +790,11 @@ var com = {
             }
         )
     }
+}
+
+function isHex(h) {
+    var a = parseInt(h,16);
+    return (a.toString(16) === h.toLowerCase())
 }
 
 function hex2dec(hex){
