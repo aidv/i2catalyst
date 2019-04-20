@@ -6,7 +6,20 @@ Dataset comes from PulseView annotation export using I2C decoder, which in this 
 
 I2Catalyst uses an Arduino to write and read I2C data.
 
-Each byte has it's binary representation under it.
+### Features
+
+- Sequencing. Select packets that you want to replay.
+- Write packets on the left side, read packets on the right side.
+- Packet tagging.
+- Byte representation in HEX (default), decimal and binary. Each byte has it's binary representation under it.
+- HEX, DEC and BINARY toggling.
+- Browser dev console serial communication. Actually it all happens from the NodeJS script, but you get the idea.
+
+
+## Documentation
+Read below.
+
+
 
 ### Shortcuts:
 * A: Select all packets
@@ -20,9 +33,13 @@ Each byte has it's binary representation under it.
     On top of a byte: Will increase or decrease the value of the byte.
 * T: Toggle tags
 
-### Serial output
-All serial communication will be printed in the web browser developer console.
+### Serial communication
+You can see all the serial communication in the browser dev console.
 
+To send data you can run the line ```com.send(string)``` in the dev console.
+
+Command ```com.send('write,addr_hex,byte1_hex, ...byte10_hex')``` will send an (up to) 10 byte packet to a specified address.
+Example: ```com.send('write,47,68,65,6C,6C,6F,77,6F,72,6C,64')``` will write ```helloworld``` to address ```0x47``.
 
 ## Usage & Functionality
 
@@ -65,7 +82,6 @@ ESC will abort tagging and ENTER will confirm the tag.
 Erase all text in the tag and press ENTER to remove the tag.
 
 Pressing T on your keyboard will toggle tags on or off.
-
 
 # Brainstorming
 
