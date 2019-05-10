@@ -60,6 +60,19 @@
                 <div class="ui approve blue button">Connect</div>
             </div>
         </div>
+
+
+
+        <div class="ui modal scripting_modal">
+            <div class="header">Scripting</div>
+            <div class="inverted content" style="text-align: center;">
+                <textarea id="scriptingArea"></textarea>
+            </div>
+            <div class="actions">
+                <div class="ui cancel button">Cancel</div>
+                <div class="ui approve blue button">Save</div>
+            </div>
+        </div>
             
         <div class="ui tiny fixed menu">
             <div class="header item">I²Catalyst</div>
@@ -76,6 +89,7 @@
                 <div id="i2c_snapshots_list" class="menu"></div>
             </a>
 
+            
             <a class="ui dropdown icon item filters_MenuItem">
                 <i class="filter icon"></i>
                 <div class="menu">
@@ -85,6 +99,10 @@
                 </div>
             </a>
 
+            <a class="ui dropdown icon item scripting_MenuItem">
+                <i class="code icon"></i>
+            </a>
+            
             <div class="item" style="">
                 <div id="sequenceAction" class="ui labeled button" tabindex="0">
                     <div id="sequenceActionBtn" class="ui blue icon tiny button">
@@ -138,10 +156,12 @@
         <!--div class="xivmap top-right"></div>
         <script src="lib/xivmap/xivmap.js"></script>-->
         
+        <div id="scripting"></div>
 
         <script src="lib/tools.js"></script>
         <script src="lib/packetSequencer.js"></script>
         <script src="lib/packetTable.js"></script>
+        <script src="lib/scripting.js"></script>
         <script src="lib/script.js"></script>
 
         

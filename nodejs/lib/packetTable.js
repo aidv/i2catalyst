@@ -365,9 +365,15 @@ var packetTable = {
             side.data.side = side
 
             side.data.setNewValues = function(bytes, opt = {refreshOccurances: false}){
-                this.packet.bytes = bytes;
+                var output = {new: bytes, output: bytes}
+                if (scripting_OnNewDataValues)
+                    scripting_OnNewDataValues(side.packet, output)
+
+                this.packet.bytes = output.output;
                 packetTable.newElement.newData(this.side, {allowEditing: true})
                 if (opt.refreshOccurances == true) packetTable.refreshOccurances(opt.opt)
+
+                
             }
 
             side.data.updateValueRepresentation = function(){

@@ -1,0 +1,49 @@
+function scripting_OnNewDataValues(packet, data){
+    function parseBytes(bytes){
+        var result = {}
+
+        var b1 = bitArray(bytes[0])
+        var b2 = bitArray(bytes[1])
+        var b3 = bitArray(bytes[2])
+
+        /*  PARSE BYTE 1 + 2  */
+        //Get FADER position
+        var upperByte = (bytes[0] >> 6);
+        var lowerByte = (bytes[1] >> 6) + (bytes[0] << 2);
+
+        var uint8 = Uint8Array.from([upperByte, lowerByte])
+        var view = new DataView(uint8.buffer)
+        
+        result.position  = view.getInt16();
+
+        /*  PARSE BYTE 2  */
+        
+        result.off = !!+b2[4]
+        result.on = !!+b2[5]
+        result.write = !!+b2[2]
+
+        /*  PARSE BYTE 3  */
+        result.ready_auto = !!+b3[3]
+        result.touch = !!+b3[2]
+        
+        return result;
+    }
+
+    if (data.new.length == 3){
+        var parseValues = parseBytes(data.new)
+        if (parseValues.position > 5){
+            var line = ''
+
+            var pos = Math.floor((40 / 1023) * parseValues.position)
+            for (var i = 0; i < pos; i++) line += '-'
+            line += '|'
+            for (var i = 0; i < 40 - pos; i++) line += '-'
+            
+            console.log(line) 
+        }
+        
+
+
+        //data.output = 
+    }
+}
