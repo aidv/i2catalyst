@@ -19,136 +19,59 @@
 
     <script src="lib/underscore-min.js"></script>
 
-    <style type="text/css">
-
-        body {
-            background-color: rgb(15, 15, 15);
-        }
-
-        .ui.table td {
-            padding: .2em .7em !important;
-        }
-
-        .firstOccurance_bg {
-            background-color: rgba(255, 255, 255, 0.07) !important;
-        }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/13.1.5/nouislider.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/13.1.5/nouislider.js"></script>
 
 
-        .sequence {
-            /*background-color: rgb(255, 243, 177) !important;*/
-        }
+    <link rel="stylesheet" href="lib/xivmap/xivmap.css">
 
-        .sequence-width {
-            /*background-color: rgb(255, 243, 177) !important;*/
-            width: 3rem !important;
-        }
-
-        .fakeHidden {
-            display: none !important;
-        }
-
-        td {
-            border-left: 0px !important;
-        }
-
-        .orange_bg {
-            background-color: rgb(219, 255, 61) !important;
-        }
-
-        .grey_bg {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .write_bg {
-            background-color: rgba(255, 17, 0, 0.5) !important;
-        }
-        
-        .read_bg {
-            background-color: rgba(0, 195, 255, 0.5) !important;
-        }
-
-        .write_sequence_bg {
-            background-color: rgba(255, 17, 0, 0.1) !important;
-        }
-        
-        .read_sequence_bg {
-            background-color: rgba(0, 195, 255, 0.1) !important;
-        }
-
-        .packetByte.hex, .packetByte.dec {
-            width: 2.8rem !important;
-        }
-
-
-        .toggle.label {
-            cursor: pointer;
-            display: inline-block;
-            margin-right: 1em;
-            font-size: 1rem;
-        }
-
-        .ui.toggle.checkbox .box:hover::before,
-        .ui.toggle.checkbox label:hover::before {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        .menuSpacer {
-            width: 2.8rem;
-        }
-
-        .packetAddress {
-            text-align: center !important;
-        }
-
-        .bits {
-            /*position: absolute !important;*/
-            width: 2.8rem !important;
-            height: 4px;
-            display: table;
-            padding: 0px !important;
-            border-spacing: 1px;
-
-            top: 0rem;
-            z-index: 99;
-
-            margin-right: 3px !important;
-        }
-
-        .bit {
-            width: 2px !important;
-            height: 1px !important;
-            display: table-cell;
-            padding: 0px !important;
-        }
-
-        .bit.zero {
-            background-color: rgb(0, 0, 0) !important;
-        }
-
-        .bit.one {
-            background-color: rgb(255, 255, 255) !important;
-        }
-
-        .packetTagTD {
-            background-color: rgb(15, 15, 15) !important;
-            padding: 0px !important;
-            width: 2rem !important;
-            text-align: right !important;
-        }
-
-    </style>
+    <link rel="stylesheet" href="/lib/style.css">
 </head>
 
     <body>
+        <div class="ui modal loadingModal">
+            <!--<div class="ui progress progress_ProgressBar">
+                <div class="bar">
+                    <div class="progress"></div>
+                </div>
+                <div class="label">Loading...</div>
+            </div>-->
+            <div class="ui text active loader loadingText">Loading</div>
+            
+        </div>
+        
+        <div class="ui modal remote_i2c_host_modal">
+            <div class="header">Remote I2C Host</div>
+            <div class="inverted content" style="text-align: center;">
+                <span>
+                    <div class="ui input remoteI2CHostIP">
+                        <input id="connectToRemoteI2CHost_address" type="text" placeholder="IP" value="192.168.1.10">
+                    </div>
+                </span>
+                <span>:</span>
+                <span>
+                    <div class="ui input remoteI2CHostPort" style="width: 5rem;">
+                        <input id="connectToRemoteI2CHost_port" type="text" placeholder="Port" value="8082">
+                    </div>
+                </span>
+            </div>
+            <div class="actions">
+                <div class="ui cancel button">Cancel</div>
+                <div class="ui approve blue button">Connect</div>
+            </div>
+        </div>
+            
         <div class="ui tiny fixed menu">
             <div class="header item">I²Catalyst</div>
             <a class="ui dropdown icon item comPort_MenuItem">
+                <i id="port_status_icon" class="times red icon"></i>
+                <span style="width: 0.5rem !important;"></span>
                 Port
                 <i class="dropdown icon"></i>
                 <div id="comPortList" class="menu"></div>
             </a>
             <a class="ui dropdown icon item snapshots_MenuItem">
-                Snapshots
+                <span class="snapshotsTitle">Snapshots</span>
                 <i class="dropdown icon"></i>
                 <div id="i2c_snapshots_list" class="menu"></div>
             </a>
@@ -170,8 +93,11 @@
                     <a id="sequenceActionLabel" class="ui basic blue left pointing label">-</a>
                 </div>
 
+                <div class="sequenceDelay" style="width: 5rem; margin-left: 1rem;"></div>                
+            </div>
+            
 
-                <div class="menuSpacer"></div>
+            <div class="item" style="">
                 <div>
                     <div class="toggle label">HEX</div>
                     <div id="toggleHexDec" class="ui toggle checkbox">
@@ -179,7 +105,6 @@
                         <label>DEC</label>
                     </div>
                 </div>
-                
             </div>
         </div>
 
@@ -201,21 +126,24 @@
                 </div>
             </div>
             
-            <!--
-            <div style="height: 14rem; width: 100%; background-color: brown;">
-
-            </div>
-            -->
-
-            <!--<div style="overflow-y: scroll; bottom: 20rem !important;"">-->
-                <table  class="ui selectable celled very basic collapsing table" style="display: inline-block;">
-                    <tbody id="packet-table"></tbody>
-                </table>
-            <!--</div>-->
+            <table  class="ui selectable celled very basic collapsing table" style="display: inline-block;">
+                <tbody id="packet-table">
+                    <!-- Packets are shown here-->
+                </tbody>
+            </table>
 
             
         </div>
 
+        <!--div class="xivmap top-right"></div>
+        <script src="lib/xivmap/xivmap.js"></script>-->
+        
+
+        <script src="lib/tools.js"></script>
+        <script src="lib/packetSequencer.js"></script>
+        <script src="lib/packetTable.js"></script>
         <script src="lib/script.js"></script>
+
+        
     </body>
 </html>
