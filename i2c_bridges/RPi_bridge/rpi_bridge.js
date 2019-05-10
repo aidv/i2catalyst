@@ -95,7 +95,7 @@ function startWSServer(){
             i2c_bus.i2cRead(parseInt(msg.address, 16), buf.length, buf, function(err, bytesRead, buffer){
                 if (err == null){
                     var bytes = []
-                    for (var i = 0; i < buffer.length; i++) bytes.push(buffer[i])
+                    for (var i = 0; i < buffer.length; i++) bytes.push((+buffer[i]).toString(16).toUpperCase())
                     respondWith({status: 'ok', bytes: bytes})
                 } else {
                     respondWith({status: 'error', message: 'error_reading_from_i2c_bus'})
