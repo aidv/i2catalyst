@@ -34,6 +34,8 @@ var packetTable = {
             data     : {container: $('<td class="packetData"></td>').appendTo(row)},
 
             differencesFromPrevious: function(){
+                return {}
+                
                 var res = {}
 
                 if (this.row.writeSide.packet && this.row.previousRow.writeSide.packet){
@@ -52,6 +54,7 @@ var packetTable = {
             },
 
             adaptToPrevious: function(){
+                
                 if (!this.packet) return;
 
                 var differences = {different: false}
@@ -113,6 +116,8 @@ var packetTable = {
             tag      : {container: $('<td class="packetTagContainer"></td>').appendTo(row)},
 
             differencesFromPrevious: function(){
+                return {};
+                
                 var res = {}
 
                 if (this.row.readSide.packet && this.row.previousRow.readSide.packet){
@@ -279,18 +284,19 @@ var packetTable = {
                 ...{
                     container: side.tag.container,
                     icon  : $('<i class="tag inverted icon packetTag packetTagIcon"></i>').appendTo(side.tag.container),
-                    label : $('<a class="ui black ' + (side.side == 'write' ? 'right' : 'left') + ' pointing label packetTag ' + class_ + '">').appendTo(side.tag.container),
-                                        
+                    label : $('<a class="ui black ' + (side.side == 'write' ? 'right' : 'left') + ' pointing label packetTag ' + class_ + '">').appendTo(side.tag.container),                   
                 }
             }
 
             side.tag.input = $('<div class="ui transparent inverted input"><input type="text" placeholder="Tag..." tabindex="0"></div>').appendTo(side.tag.label)
             side.tag.text = $('<span class="labelText"></span>').appendTo(side.tag.label)
 
+            side.tag.label[0].tagObj = side;
             side.tag.container[0].tagObj = side.tag;
 
             side.tag.icon.hide()
             side.tag.label.hide()
+            
             
             
 

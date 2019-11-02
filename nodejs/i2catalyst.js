@@ -169,9 +169,14 @@ function initWSCB(){
 
 
     wscb.on('connectToRemoteI2CHost', function(msg, respondWith){
-        remote_i2c_host.connectTo(msg.address, (status) => {
+        fake.connectTo(msg.address, (status) => {
             respondWith(status)
         }, msg.port);
+    })
+
+    wscb.on('connectToFakeI2CBridge', function(msg, respondWith){
+        console.log('[FAKE I2C BRIDGE] Initializing...')
+        fake_i2c_bridge.start(respondWith);
     })
 
     
@@ -406,3 +411,31 @@ var remote_i2c_host = {
         onDone({status: 'ok'})
     }
 }
+
+
+
+
+
+var fake_i2c_bridge = {
+    start: function(ws_callback){
+        console.log('[FAKE BRIGDE] Starting fake I2C device...');
+        i2c_device = fake_i2c_bridge.i2c_bridge;
+        if (ws_callback != undefined) ws_callback({status: 'ok'});
+    },
+
+    i2c_bridge: {
+        onDone_Callback: undefined,
+
+        write: function(address, bytes, onDone){
+            onDone({status: 'ok', operation: 'write', bytes: bytes}); 
+        },
+    
+        read: function(address, byteCount, onDone){
+            var bytes_ = []
+            for (var i = 0; i < byteCount; i++) bytes_.push('00');
+            onDone({status: 'ok', operation: 'read', bytes: bytes_}); 
+        },
+
+        disconnect: function(onDone){ console.log('[FAKE BRIGDE] Port closed'); }
+    }
+};

@@ -2,6 +2,42 @@ var packetSequencer = {
     status: 'stopped',
     delay: {},
 
+    loop: {
+        start: undefined,
+        end: undefined,
+        packets: [],
+        iterations: {max: -1, current: 0},
+        
+        clear: function(){
+            packetSequencer.loop.packets = [];
+            packetSequencer.loop.iterations.max = -1;
+        },
+
+        refresh: function(){
+            packetSequencer.loop.clear();
+
+            if (!packetSequencer.loop.start || !packetSequencer.loop.end) return;
+            if (packetSequencer.loop.start.idx > packetSequencer.loop.end.idx){
+                alert('Invalid Loop: Loop End occurs before Loop Start.');
+                return;
+            }
+
+            for (var i = 0; i < packetSequencer.packets.packets.length; i++){
+                var operation = packetSequencer.packets.packets[i]
+                var p_idx = operation.p_idx;
+                
+                try { 
+                    if (p_idx.indexOf('r') > -1) p_idx = parseInt(p_idx.replace('r', ''));
+                } catch {}
+
+                var packet = packets[p_idx];
+
+                if (packet.row.idx >= packetSequencer.loop.start && packet.row.idx <= packetSequencer.loop.end)
+                    packetSequencer.loop.packets.push(operation);
+            }
+        }
+    },
+
     packets: {
         packets: [],
 
@@ -13,6 +49,7 @@ var packetSequencer = {
                 p_idx: idx,
                 address: packet.address,
                 bytes: packet.bytes,
+                //row: packet.row
             }
             
 
@@ -27,6 +64,8 @@ var packetSequencer = {
             runSequenceBtn.enabled(true)
 
             runSequenceBtn.label.text(packetSequencer.packets.packets.length)
+
+            packetSequencer.loop.refresh()
         },
 
         remove: function(idx){
@@ -59,6 +98,8 @@ var packetSequencer = {
     },
 
     run: function(){
+        packetSequencer.loop.iterations.current = 0;
+
         if (packetSequencer.packets.packets.length == 0 || packetSequencer.status == 'running' || !comPortListening) return
 
         for (var i = 0; i < packetSequencer.packets.packets.length; i++)
@@ -150,7 +191,21 @@ var packetSequencer = {
 
                 side.data.container.removeClass(response.operation + '_bg');
                 side.data.container.removeClass('orange_bg');
+
+                var p_idx = packetSequencer.packets.sequence[0].p_idx;
+                try { 
+                    if (p_idx.indexOf('r') > -1){
+                        p_idx = parseInt(p_idx.replace('r', '')) + 1;
+                    }
+                } catch {}
+                
                 packetSequencer.packets.sequence.splice(0, 1)
+
+                if (packetSequencer.loop.end == packets[p_idx].row.idx){
+                    for (var i = packetSequencer.loop.packets.length - 1; i > -1; i--)
+                        packetSequencer.packets.sequence.unshift(packetSequencer.loop.packets[i])
+                }
+                
                 packetSequencer.sendNext()
 
                 if (packetSequencer.packets.sequence.length == 0){

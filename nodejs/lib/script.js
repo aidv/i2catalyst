@@ -91,6 +91,8 @@ function onSnapshotItemClick(){
 
     $('.snapshotsTitle').html('Snapshot: ' + filename)
 
+    clearSequence();
+    
     progressModal.start(0, filename, function(){
 
         wscb.send({cmd: 'load_snapshot', snapshot: filename},
@@ -185,6 +187,24 @@ function refreshComPorts(){
             $('.comPortItem').click(onComPortItemClick)
 
 
+
+            $('#comPortList').append('<div class="divider"></div>')
+            $('#comPortList').append('<div class="header">Fake I2C Bridge</div>')
+            $('#comPortList').append('<div id="connectFakeBridge" class="item">Connect fake I2C Bridge</div>');
+            $('#connectFakeBridge').click(function(){
+                wscb.send({cmd: 'connectToFakeI2CBridge'},
+                    (response) => {
+                        if (response.status == 'ok'){
+                            setComPortStatus('connected')
+                        } else {
+                            alert('Could not connect to Fake I2C bridge. Error code: ' + response.message)
+                            setComPortStatus('disconnected')
+                        }
+                    }
+                )
+            })
+
+
             $('#comPortList').append('<div class="divider"></div>')
             $('#comPortList').append('<div id="disconnectComPort" class="item ' + (comPortListening ? '' : 'disabled') + '">Disconnect</div>')
 
@@ -196,7 +216,6 @@ function refreshComPorts(){
                     }
                 )
             })
-
         }
     )
 }
@@ -232,7 +251,40 @@ $(document).keydown(function(e) {
 
             captureTagInput.input.hide()
 
-            if (captureTagInput.text.html() == '') captureTagInput.label.hide()
+            var TagInput = captureTagInput.text.html().toLowerCase();
+            if (TagInput == ''){
+                captureTagInput.label.hide();
+                if (captureTagInput.lastText.toLowerCase() == 'loop start') packetSequencer.loop.start = undefined;
+                if (captureTagInput.lastText.toLowerCase() == 'loop end') packetSequencer.loop.end = undefined;
+                
+            }
+
+            captureTagInput.label.removeClass('black');
+            
+            if (TagInput.indexOf('loop start') > -1 || TagInput.indexOf('loop end') > -1){ captureTagInput.label.addClass('blue'); } else { captureTagInput.label.addClass('black'); }
+
+            var packet = captureTagInput.label[0].tagObj.packet;
+            var packet_idx = (packet.respondsTo ? packet.respondsTo + 1 : packet.idx)
+            packet = packets[packet_idx]
+            var row = packet.row;
+            var side = (packet.respondsTo ? row.readSide : row.writeSide);
+            var tag = side.tag
+            
+            if (TagInput.indexOf('loop start') > -1){
+                //if (packetSequencer.loop.start != packet_idx) tag.text.html(packetSequencer.loop.start.tag.text.html().replace('loop start', '').trim())
+                packetSequencer.loop.start = row.idx
+            }
+
+            if (TagInput.indexOf('loop end') > -1){
+                //if (packetSequencer.loop.end != packet_idx) tag.text.html(packetSequencer.loop.end.tag.text.html().replace('loop end', '').trim())
+                packetSequencer.loop.end = row.idx
+            }
+
+            packetSequencer.loop.refresh();
+
+            console.log(packetSequencer.loop)
+
+
             captureTagInput = undefined;
         }
         return;
@@ -556,6 +608,12 @@ wscb.on('packets', function(msg, respondWith){
             row = packetTable.addRow(packet, (i > 0 ? packetTable.rows[i - 1] : undefined));
         
         packet.row = row;
+
+        /*if (i == 50){
+            console.log("BREAK TEST");
+            break;
+        }*/
+
 
     }
 
