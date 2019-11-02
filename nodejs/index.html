@@ -12,9 +12,7 @@
         crossorigin="anonymous">
     </script>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
-
+    
     <script src="./node_modules/wscb/lib/wscb.js"></script>
 
     <script src="lib/underscore-min.js"></script>
@@ -23,12 +21,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/13.1.5/nouislider.js"></script>
 
 
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+
+
+
     <link rel="stylesheet" href="lib/xivmap/xivmap.css">
 
     <link rel="stylesheet" href="/lib/style.css">
+
+    <link rel="stylesheet" href="lib/codemirror-5.46.0/theme/dracula.css">
+    <link rel="stylesheet" href="lib/codemirror-5.46.0/lib/codemirror.css">
+    <script src="lib/codemirror-5.46.0/lib/codemirror.js"></script>
+    <script src="lib/codemirror-5.46.0/mode/javascript/javascript.js"></script>
+    <script src="lib/codemirror-5.46.0/addon/selection/active-line.js"></script>
+    <script src="lib/codemirror-5.46.0/addon/edit/matchbrackets.js"></script>
+    
 </head>
 
     <body>
+
         <div class="ui modal loadingModal">
             <!--<div class="ui progress progress_ProgressBar">
                 <div class="bar">
@@ -61,18 +74,60 @@
             </div>
         </div>
 
+        <div class="ui modal export_modal">
+            <div class="header">Export Sequence</div>
+            <div class="inverted content">
+                
+                Write delay:
+                <div class="exportSequence_WriteDelay"></div>    
+                
+                <br>
+                <br>
+            
+                Read delay:
+                <div class="exportSequence_ReadDelay"></div>    
 
+                <br>
+                <br>
 
-        <div class="ui modal scripting_modal">
-            <div class="header">Scripting</div>
-            <div class="inverted content" style="text-align: center;">
-                <textarea id="scriptingArea"></textarea>
+                <div class="ui form exportSequence_Platform" selected-platform="arduino">
+                    <div class="inline fields">
+                        <label>Platform</label>
+                        <div class="field">
+                        <div class="ui radio checkbox export_platform_type" value="arduino">
+                            <input type="radio" name="arduino" checked="checked">
+                            <label>Arduino</label>
+                        </div>
+                        </div>
+                        <div class="field">
+                        <div class="ui radio checkbox export_platform_type" value="nodejs">
+                            <input type="radio" name="nodejs">
+                            <label>NodeJS</label>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
             <div class="actions">
                 <div class="ui cancel button">Cancel</div>
-                <div class="ui approve blue button">Save</div>
+                <div class="ui approve blue button">Export</div>
             </div>
         </div>
+
+        <div class="ui modal export_results">
+                <div class="header">Export Sequence</div>
+                <div class="inverted content">
+                    <textarea id="export_results_editor"></textarea>
+                </div>
+                <div class="actions">
+                    <div class="ui approve button">Close</div>
+                </div>
+            </div>
+
+        
+        <!--<div class="scriptEditorContainer"><textarea id="scriptEditor" name="scriptEditor"></textarea></div>-->
+        
             
         <div class="ui tiny fixed menu">
             <div class="header item">I²Catalyst</div>
@@ -99,7 +154,7 @@
                 </div>
             </a>
 
-            <a class="ui dropdown icon item scripting_MenuItem">
+            <a class="ui icon item scripting_MenuItem">
                 <i class="code icon"></i>
             </a>
             
@@ -111,7 +166,9 @@
                     <a id="sequenceActionLabel" class="ui basic blue left pointing label">-</a>
                 </div>
 
-                <div class="sequenceDelay" style="width: 5rem; margin-left: 1rem;"></div>                
+                <div class="sequenceDelay" style="width: 5rem; margin-left: 1rem;"></div>    
+                
+                <div id="exportSequenceBtn" class="ui icon inverted button" style="margin-left: 1rem;"><i id="sequenceActionIcon" class="share square blue icon"></i></div>
             </div>
             
 
@@ -162,6 +219,7 @@
         <script src="lib/packetSequencer.js"></script>
         <script src="lib/packetTable.js"></script>
         <script src="lib/scripting.js"></script>
+        <script src="lib/exporter.js"></script>
         <script src="lib/script.js"></script>
 
         

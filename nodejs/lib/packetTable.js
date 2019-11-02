@@ -366,8 +366,8 @@ var packetTable = {
 
             side.data.setNewValues = function(bytes, opt = {refreshOccurances: false}){
                 var output = {new: bytes, output: bytes}
-                if (scripting_OnNewDataValues)
-                    scripting_OnNewDataValues(side.packet, output)
+                /*if (scripting_OnNewDataValues != undefined)
+                    scripting_OnNewDataValues(side.packet, output)*/
 
                 this.packet.bytes = output.output;
                 packetTable.newElement.newData(this.side, {allowEditing: true})

@@ -1,28 +1,34 @@
 #include <elapsedMillis.h>
-#include <WSWire.h>
+//#include <Wire.h>
+#include <SoftwareWire.h>
 
-//#include <UptownAutomationSystems.h>
+String bridgeVersion = "1.0.2";
 
-#define uptown 0x40            //Uptown 990 Driver Board i2c address (Might be different for others, all mine are 0x40)
-#define allCall 0x00           //i2c all call address  (probably not needed but it seems to be apart of the initialization process)
+int i2c_sda = 32;
+int i2c_scl = 33;
+
+SoftwareWire wire;
+
 
 bool runningNotified = false;
 
 void setup() {
-  digitalWrite( SDA, LOW); //needed to ignore level shifter
-  digitalWrite( SCL, LOW); //needed to ignore level shifter
+  //digitalWrite( i2c_sda, LOW); //needed to ignore level shifter
+  //digitalWrite( i2c_scl, LOW); //needed to ignore level shifter
 
   Serial.setTimeout(1);
   Serial.begin(2000000);
 
-  Wire.begin(); //needed to ignore level shifter
+  //Wire.begin();
+  wire = SoftwareWire(i2c_sda, i2c_scl);
+  wire.begin();
 }
 
 
 
 void loop() {
   if (!runningNotified){
-    Serial.println("RUNNING!");
+    Serial.println("running," + bridgeVersion);
     runningNotified = true;
   }
   
@@ -39,7 +45,10 @@ void serialRead() {
 
   String cmd = getValue(serialInput, ',', 0);
 
-  
+  /*if (cmd == "setup"){
+    wire = SoftwareWire(i2c_sda, i2c_scl);
+    wire.begin();
+  } else*/
   if (cmd == "write"){
     uint8_t toAddr = hexStrToByte(getValue(serialInput, ',', 1));
 
@@ -51,15 +60,15 @@ void serialRead() {
 
     Serial.print("write,ok," + getValue(serialInput, ',', 1) + ",");
 
-    Wire.beginTransmission(toAddr);
+    wire.beginTransmission(toAddr);
     for (int i = 0; i < BYTE_LENGTH; i++){
       if (bytesStr[i] != ""){
-        Wire.write(hexStrToByte(bytesStr[i]));
+        wire.write(hexStrToByte(bytesStr[i]));
         Serial.print(bytesStr[i]);
         Serial.print(",");
       }
     }
-    Wire.endTransmission();
+    wire.endTransmission();
     
     Serial.println("");
   } else if (cmd == "read"){
@@ -67,12 +76,12 @@ void serialRead() {
 
     uint8_t bytes = getValue(serialInput, ',', 2).toInt();
     
-    Wire.requestFrom(toAddr, bytes);
+    wire.requestFrom(toAddr, bytes);
 
     Serial.print("read,");
     for (int i = 0; i < bytes; i++){
       char s[2];
-      sprintf(s, "%02x",Wire.read());
+      sprintf(s, "%02x",wire.read());
       Serial.print(s);
       Serial.print(",");
     }

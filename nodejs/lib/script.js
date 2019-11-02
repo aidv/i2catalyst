@@ -84,8 +84,10 @@ function onComPortItemClick(){
     )
 }
 
+var currentSnapshotName = ''
 function onSnapshotItemClick(){
     var filename = $(this).attr('data-value');
+    currentSnapshotName = filename
 
     $('.snapshotsTitle').html('Snapshot: ' + filename)
 

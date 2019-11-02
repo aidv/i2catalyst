@@ -1,3 +1,13 @@
+function scripting_OnRefresh(){
+
+    //will iterate through each row and read the bytes and do something with the values
+    for (var i = 0; i < packetTable.rows.length; i++){
+        var row = packetTable.rows[i];
+
+
+    }
+}
+
 function scripting_OnNewDataValues(packet, data){
     function parseBytes(bytes){
         var result = {}

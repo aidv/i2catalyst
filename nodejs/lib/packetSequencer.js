@@ -146,7 +146,7 @@ var packetSequencer = {
         var data = {cmd: 'operation', operation: packetSequencer.packets.sequence[0]}
         wscb.send(data, function(response){
             function proceed(){
-                if (response.operation == 'read' && response.bytes && response.bytes.length > 0) side.data.setNewValues(response.bytes)
+                if (side.data.setNewValues != undefined && response.operation == 'read' && response.bytes && response.bytes.length > 0) side.data.setNewValues(response.bytes)
 
                 side.data.container.removeClass(response.operation + '_bg');
                 side.data.container.removeClass('orange_bg');

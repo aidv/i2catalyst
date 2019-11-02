@@ -1,19 +1,13 @@
 //https://codemirror.net/
 
 var scripting = {
-    init: function(){
-        $('#scriptingArea').val(`function scripting_OnNewDataValues(packet, data){
-
-}`)
-    },
-
     update: function(){
         $('#scripting').empty();
-        $('#scripting').append('<script>' + $('#scriptingArea').val() + '</script>')
+        $('#scripting').append('<script>' + scriptingEditor.getDoc().getValue() + '</script>')
     }
 }
 
-scripting.init()
+
 
 $('.scripting_MenuItem').click(function(){
     $('.scripting_modal').modal({
@@ -22,3 +16,18 @@ $('.scripting_MenuItem').click(function(){
         }
     }).modal('show')
 })
+
+
+/*
+var scriptingEditor = CodeMirror.fromTextArea(document.getElementById("scriptEditor"), {
+    mode: 'javascript',
+    lineNumbers: true,
+    styleActiveLine: true,
+    matchBrackets: true,
+    theme: 'dracula',
+    indentUnit: 4,
+});
+
+scriptingEditor.getDoc().setValue('function scripting_OnNewDataValues(packet, data){\n\n}');
+
+*/
